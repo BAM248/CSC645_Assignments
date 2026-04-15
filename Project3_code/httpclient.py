@@ -1,21 +1,34 @@
+# httpclient.py
 import socket
 import os
 import webbrowser
 
 # Server Configuration
-SERVER_IP = input("Enter the server IP address (Instructor's laptop IP): ")
+SERVER_IP = input("Enter the server IP address): ")
 SERVER_PORT = 8080
 
 # Student Inputs HTTP Method and Path
 http_method = input("Enter HTTP method (GET or POST): ").strip().upper()
-request_path = input("Enter request path (e.g., /index.html, /wow.jpg, or /post): ").strip()
+request_path = input("Enter request path (e.g., /index.html, /wow.jpg, /document.pdf, or /post): ").strip()
 
-# Handle POST request (Ask for user input)
+# Handle POST request (attendance)
 post_data = ""
 if http_method == "POST":
-    post_data = input("Enter data to send in POST request: ")
+    student_id = input("Enter student ID: ")
+    student_name = input("Enter student name: ")
+
+    student_name = student_name.replace(" ", "+")
+    post_data = f"student_id={student_id}&name={student_name}"
+
     content_length = len(post_data)
-    http_request = f"{http_method} {request_path} HTTP/1.1\r\nHost: {SERVER_IP}\r\nContent-Length: {content_length}\r\nContent-Type: text/plain\r\n\r\n{post_data}"
+
+    http_request = (
+        f"{http_method} {request_path} HTTP/1.1\r\n"
+        f"Host: {SERVER_IP}\r\n"
+        f"Content-Length: {content_length}\r\n"
+        f"Content-Type: text/plain\r\n\r\n"
+        f"{post_data}"
+    )
 else:  # Handle GET request
     http_request = f"{http_method} {request_path} HTTP/1.1\r\nHost: {SERVER_IP}\r\n\r\n"
 
@@ -55,7 +68,7 @@ else:
 
 # Handle GET Response: Save and Open Webpage or Image
 if http_method == "GET":
-    if request_path == "/index.html":
+    if request_path == "/index.html" or request_path == "/":
         html_path = "downloaded_page.html"
         with open(html_path, "wb") as f:
             f.write(body)
@@ -66,3 +79,8 @@ if http_method == "GET":
         with open(img_path, "wb") as f:
             f.write(body)
         print(f"\nImage saved as {img_path}. Open it manually.")
+    elif request_path == "/document.pdf":
+        pdf_path = "downloaded_document.pdf"
+        with open(pdf_path, "wb") as f:
+            f.write(body)
+        print(f"\nPDF saved as {pdf_path}. Open it manually.")
